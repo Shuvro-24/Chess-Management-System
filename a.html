@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chess Training & Management System</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Arial, sans-serif;
+    background:#0f172a;
+    color:white;
+    padding:20px;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+}
+
+h1,h2,h3{
+    margin-bottom:15px;
+}
+
+.card{
+    background:#1e293b;
+    padding:20px;
+    border-radius:12px;
+    margin-bottom:20px;
+}
+
+input,select,textarea{
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border:none;
+    border-radius:6px;
+}
+
+button{
+    width:100%;
+    padding:10px;
+    border:none;
+    border-radius:6px;
+    background:#22c55e;
+    color:white;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+button:hover{
+    background:#16a34a;
+}
+
+.stats{
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+.stat-box{
+    flex:1;
+    min-width:180px;
+    background:#334155;
+    padding:20px;
+    border-radius:10px;
+    text-align:center;
+}
+
+.player-box{
+    background:#334155;
+    padding:10px;
+    border-radius:6px;
+    margin:8px 0;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th,td{
+    border:1px solid #475569;
+    padding:10px;
+    text-align:center;
+}
+
+th{
+    background:#334155;
+}
+
+tr:nth-child(even){
+    background:#1e293b;
+}
+
+.insight{
+    background:#334155;
+    padding:15px;
+    border-radius:8px;
+    margin-top:10px;
+    line-height:1.7;
+}
+
+textarea{
+    resize:vertical;
+}
+
+@media(max-width:768px){
+
+    .stats{
+        flex-direction:column;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>♟️ Chess Training & Management System</h1>
+
+<!-- STATS -->
+
+<div class="stats">
+
+    <div class="stat-box">
+        <h3>Total Matches</h3>
+        <p id="totalMatches">0</p>
+    </div>
+
+    <div class="stat-box">
+        <h3>Current Rating</h3>
+        <p id="currentRating">1800</p>
+    </div>
+
+    <div class="stat-box">
+        <h3>Win Rate</h3>
+        <p id="winRate">0%</p>
+    </div>
+
+    <div class="stat-box">
+        <h3>Best Opening</h3>
+        <p id="bestOpening">N/A</p>
+    </div>
+
+</div>
+
+<!-- ADD PLAYER -->
+
+<div class="card">
+
+    <h2>Add Practice Partner</h2>
+
+    <input type="text" id="playerName" placeholder="Player Name">
+
+    <input type="number" id="playerRating" placeholder="Player Rating">
+
+    <button onclick="addPlayer()">Add Player</button>
+
+    <div id="playerList"></div>
+
+</div>
+
+<!-- ADD MATCH -->
+
+<div class="card">
+
+    <h2>Add Match</h2>
+
+    <select id="opponent"></select>
+
+    <select id="result">
+        <option value="Win">Win</option>
+        <option value="Loss">Loss</option>
+        <option value="Draw">Draw</option>
+    </select>
+
+    <!-- OPENING LIST -->
+
+    <select id="opening">
+
+        <option value="Sicilian Defense">Sicilian Defense</option>
+        <option value="French Defense">French Defense</option>
+        <option value="Caro-Kann Defense">Caro-Kann Defense</option>
+        <option value="Ruy Lopez">Ruy Lopez</option>
+        <option value="Italian Game">Italian Game</option>
+        <option value="Scotch Game">Scotch Game</option>
+        <option value="Queen's Gambit">Queen's Gambit</option>
+        <option value="King's Indian Defense">King's Indian Defense</option>
+        <option value="Nimzo-Indian Defense">Nimzo-Indian Defense</option>
+        <option value="London System">London System</option>
+        <option value="English Opening">English Opening</option>
+        <option value="Pirc Defense">Pirc Defense</option>
+        <option value="Alekhine Defense">Alekhine Defense</option>
+        <option value="Dutch Defense">Dutch Defense</option>
+        <option value="Vienna Game">Vienna Game</option>
+        <option value="Scandinavian Defense">Scandinavian Defense</option>
+        <option value="Benoni Defense">Benoni Defense</option>
+        <option value="Catalan Opening">Catalan Opening</option>
+        <option value="Grunfeld Defense">Grunfeld Defense</option>
+        <option value="Modern Defense">Modern Defense</option>
+
+        <option value="custom">➕ Add New Opening</option>
+
+    </select>
+
+    <input type="text"
+    id="customOpening"
+    placeholder="Enter New Opening"
+    style="display:none;">
+
+    <textarea id="mistake" rows="4"
+    placeholder="Write your mistakes or notes..."></textarea>
+
+    <button onclick="addMatch()">Save Match</button>
+
+</div>
+
+<!-- PERFORMANCE INSIGHTS -->
+
+<div class="card">
+
+    <h2>Performance Insights</h2>
+
+    <div class="insight" id="insightBox">
+        No insights yet.
+    </div>
+
+</div>
+
+<!-- MATCHMAKING -->
+
+<div class="card">
+
+    <h2>Recommended Practice Opponent</h2>
+
+    <button onclick="suggestOpponent()">
+        Find Best Match
+    </button>
+
+    <div class="insight" id="suggestionBox">
+        No recommendation yet.
+    </div>
+
+</div>
+
+<!-- MATCH HISTORY -->
+
+<div class="card">
+
+    <h2>Match History</h2>
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>Opponent</th>
+                <th>Opponent Rating</th>
+                <th>Result</th>
+                <th>Opening</th>
+                <th>New Rating</th>
+                <th>Notes</th>
+            </tr>
+
+        </thead>
+
+        <tbody id="matchTable"></tbody>
+
+    </table>
+
+</div>
+
+</div>
+
+<script>
+
+let currentRating = 1800;
+
+let players = [];
+
+let matches = [];
+
+/* OPENING CUSTOM INPUT */
+
+document.getElementById("opening")
+.addEventListener("change", function(){
+
+    let customBox =
+    document.getElementById("customOpening");
+
+    if(this.value === "custom"){
+
+        customBox.style.display = "block";
+    }
+
+    else{
+
+        customBox.style.display = "none";
+    }
+});
+
+/* ADD PLAYER */
+
+function addPlayer(){
+
+    let name =
+    document.getElementById("playerName").value;
+
+    let rating =
+    document.getElementById("playerRating").value;
+
+    if(name === "" || rating === ""){
+
+        alert("Fill all fields!");
+        return;
+    }
+
+    players.push({
+
+        name:name,
+        rating:parseInt(rating)
+
+    });
+
+    document.getElementById("playerName").value = "";
+
+    document.getElementById("playerRating").value = "";
+
+    updatePlayers();
+}
+
+/* UPDATE PLAYER LIST */
+
+function updatePlayers(){
+
+    let list =
+    document.getElementById("playerList");
+
+    let opponent =
+    document.getElementById("opponent");
+
+    list.innerHTML = "";
+
+    opponent.innerHTML = "";
+
+    players.forEach((player,index)=>{
+
+        list.innerHTML += `
+
+            <div class="player-box">
+
+                ♟️ ${player.name}
+                | Rating: ${player.rating}
+
+            </div>
+        `;
+
+        opponent.innerHTML += `
+
+            <option value="${index}">
+
+                ${player.name}
+                (${player.rating})
+
+            </option>
+        `;
+    });
+}
+
+/* ELO CALCULATION */
+
+function calculateRating(
+playerRating,
+opponentRating,
+actualScore){
+
+    let k = 20;
+
+    let expectedScore =
+    1 / (1 + Math.pow(
+        10,
+        (opponentRating - playerRating)/400
+    ));
+
+    let newRating =
+    playerRating +
+    k * (actualScore - expectedScore);
+
+    return Math.round(newRating);
+}
+
+/* ADD MATCH */
+
+function addMatch(){
+
+    if(players.length === 0){
+
+        alert("Add players first!");
+        return;
+    }
+
+    let opponentIndex =
+    document.getElementById("opponent").value;
+
+    let result =
+    document.getElementById("result").value;
+
+    /* OPENING */
+
+    let openingSelect =
+    document.getElementById("opening").value;
+
+    let opening = openingSelect;
+
+    if(openingSelect === "custom"){
+
+        opening =
+        document.getElementById("customOpening").value;
+
+        if(opening === ""){
+
+            alert("Enter opening name!");
+            return;
+        }
+
+        let select =
+        document.getElementById("opening");
+
+        let option =
+        document.createElement("option");
+
+        option.text = opening;
+        option.value = opening;
+
+        select.add(
+            option,
+            select.options[
+            select.options.length - 1]
+        );
+    }
+
+    let mistake =
+    document.getElementById("mistake").value;
+
+    let opponent =
+    players[opponentIndex];
+
+    /* ELO UPDATE */
+
+    if(result === "Win"){
+
+        currentRating =
+        calculateRating(
+            currentRating,
+            opponent.rating,
+            1
+        );
+    }
+
+    else if(result === "Loss"){
+
+        currentRating =
+        calculateRating(
+            currentRating,
+            opponent.rating,
+            0
+        );
+    }
+
+    else{
+
+        currentRating =
+        calculateRating(
+            currentRating,
+            opponent.rating,
+            0.5
+        );
+    }
+
+    matches.push({
+
+        opponent:opponent.name,
+        opponentRating:opponent.rating,
+        result:result,
+        opening:opening,
+        newRating:currentRating,
+        note:mistake
+
+    });
+
+    document.getElementById("mistake").value = "";
+
+    document.getElementById("customOpening").value = "";
+
+    updateTable();
+
+    updateStats();
+
+    generateInsights();
+}
+
+/* UPDATE MATCH TABLE */
+
+function updateTable(){
+
+    let table =
+    document.getElementById("matchTable");
+
+    table.innerHTML = "";
+
+    matches.forEach(match=>{
+
+        table.innerHTML += `
+
+            <tr>
+
+                <td>${match.opponent}</td>
+
+                <td>${match.opponentRating}</td>
+
+                <td>${match.result}</td>
+
+                <td>${match.opening}</td>
+
+                <td>${match.newRating}</td>
+
+                <td>${match.note}</td>
+
+            </tr>
+        `;
+    });
+}
+
+/* UPDATE STATS */
+
+function updateStats(){
+
+    document.getElementById("totalMatches")
+    .innerText = matches.length;
+
+    document.getElementById("currentRating")
+    .innerText = currentRating;
+
+    let wins =
+    matches.filter(
+        m => m.result === "Win"
+    ).length;
+
+    let winRate = matches.length > 0 ?
+
+    ((wins / matches.length) * 100)
+    .toFixed(1)
+
+    : 0;
+
+    document.getElementById("winRate")
+    .innerText = winRate + "%";
+
+    /* BEST OPENING */
+
+    let openingStats = {};
+
+    matches.forEach(match=>{
+
+        if(openingStats[match.opening]){
+
+            openingStats[match.opening]++;
+
+        }
+
+        else{
+
+            openingStats[match.opening] = 1;
+        }
+    });
+
+    let bestOpening = "N/A";
+
+    let max = 0;
+
+    for(let opening in openingStats){
+
+        if(openingStats[opening] > max){
+
+            max = openingStats[opening];
+
+            bestOpening = opening;
+        }
+    }
+
+    document.getElementById("bestOpening")
+    .innerText = bestOpening;
+}
+
+/* PERFORMANCE INSIGHTS */
+
+function generateInsights(){
+
+    let insight = "";
+
+    let wins =
+    matches.filter(
+        m => m.result === "Win"
+    ).length;
+
+    let losses =
+    matches.filter(
+        m => m.result === "Loss"
+    ).length;
+
+    if(wins > losses){
+
+        insight +=
+        "✅ Your performance is improving.<br><br>";
+    }
+
+    else{
+
+        insight +=
+        "⚠️ You are losing more games recently. Focus on tactics and endgames.<br><br>";
+    }
+
+    /* STRONGEST OPENING */
+
+    let openingWin = {};
+
+    matches.forEach(m=>{
+
+        if(!openingWin[m.opening]){
+
+            openingWin[m.opening] = 0;
+        }
+
+        if(m.result === "Win"){
+
+            openingWin[m.opening]++;
+        }
+    });
+
+    let bestOpening = "";
+
+    let highest = -1;
+
+    for(let op in openingWin){
+
+        if(openingWin[op] > highest){
+
+            highest = openingWin[op];
+
+            bestOpening = op;
+        }
+    }
+
+    if(bestOpening !== ""){
+
+        insight +=
+        `♟️ Your strongest opening is <b>${bestOpening}</b>.<br><br>`;
+    }
+
+    /* MISTAKE REVIEW */
+
+    let mistakes =
+    matches.map(m=>m.note)
+    .filter(m=>m !== "");
+
+    if(mistakes.length > 0){
+
+        insight +=
+        "🧠 Review your mistakes before your next session.";
+    }
+
+    document.getElementById("insightBox")
+    .innerHTML = insight;
+}
+
+/* MATCHMAKING */
+
+function suggestOpponent(){
+
+    if(players.length === 0){
+
+        alert("Add players first!");
+        return;
+    }
+
+    let closest = players[0];
+
+    let smallestDiff =
+    Math.abs(
+        currentRating -
+        players[0].rating
+    );
+
+    players.forEach(player=>{
+
+        let diff =
+        Math.abs(
+            currentRating -
+            player.rating
+        );
+
+        if(diff < smallestDiff){
+
+            smallestDiff = diff;
+
+            closest = player;
+        }
+    });
+
+    document.getElementById("suggestionBox")
+    .innerHTML = `
+
+        ♟️ Best practice opponent:<br><br>
+
+        <b>${closest.name}</b><br>
+
+        Rating: ${closest.rating}<br><br>
+
+        Rating Difference: ${smallestDiff}
+
+    `;
+}
+
+</script>
+
+</body>
+</html>
